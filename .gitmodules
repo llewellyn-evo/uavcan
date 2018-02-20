@@ -1,0 +1,4 @@
+[submodule "lab09a_UAVCAN/include/libcanard"]
+	path = lab09a_UAVCAN/include/libcanard
+	url = https://github.com/karu2003/libcanard
+	branch = mware

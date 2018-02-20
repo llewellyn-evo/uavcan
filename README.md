@@ -1,2 +1,2 @@
-# MotorWare_CANOpen
-An example program runnig CANopenNode running on C2000 (MotorWare) 
+# MotorWare_UAVCAN
+An example program runnig UAVCAN running on C2000 (MotorWare) 

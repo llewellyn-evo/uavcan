@@ -50,6 +50,7 @@
 // system includes
 #include <math.h>
 #include "main.h"
+#include "canard.h"
 
 #ifdef FLASH
 #pragma CODE_SECTION(mainISR,"ramfuncs");

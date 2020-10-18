@@ -168,8 +168,24 @@ _iq gTorque_Ls_Id_Iq_pu_to_Nm_sf;
 
 _iq gTorque_Flux_Iq_pu_to_Nm_sf;
 
+
+
 // **************************************************************************
 // the functions
+
+// Can Accept Messages
+static bool shouldAcceptTransfer(const CanardInstance* ins,
+                          uint64_t* out_data_type_signature,
+                          uint16_t data_type_id,
+                          CanardTransferType transfer_type,
+                          uint8_t source_node_id){
+    return false;
+}
+
+//Can Recieved transfer
+static void onTransferReceived(CanardInstance* ins, CanardRxTransfer* transfer){
+
+}
 
 void main(void)
 {
@@ -402,6 +418,20 @@ void main(void)
    while(!(ECAN_sendMsg_FIFO_ID_One(halHandle->ecanaHandle, &gECAN_Mailbox, &gECAN_txFIFO_ID))) MessageReceivedCount++;
 #endif
 
+   //Initialize Canard
+   static CanardInstance g_canard;             // The library instance
+   static uint8_t g_canard_memory_pool[1024];  // Arena for memory allocation, used by the library
+
+   canardInit(&g_canard,                         // Uninitialized library instance
+                  g_canard_memory_pool,              // Raw memory chunk used for dynamic allocation
+                  sizeof(g_canard_memory_pool),      // Size of the above, in bytes
+                  onTransferReceived,                // Callback, see CanardOnTransferReception
+                  shouldAcceptTransfer,              // Callback, see CanardShouldAcceptTransfer
+                  NULL);
+
+   canardSetLocalNodeID(&g_canard, 100);
+   //Set Node ID
+
   for(;;)
   {
     // Waiting for enable system flag to be set
@@ -415,13 +445,16 @@ void main(void)
     		msg_temp = FIFO_FRONT(gECAN_rxFIFO_ID);
     		FIFO_POP(gECAN_rxFIFO_ID);
 
-    		int i = 0;
-    		i = msg_temp.msgID;
-    		switch(i) {
-    			case 0x006: gMotorVars.Flag_enableUserParams = false; break;
-    			case 0x106: gMotorVars.Flag_enableUserParams = true; break;
-    			default:			           gMotorVars.Flag_enableSys = true; break;
-    		}
+    		//Function to get time is needed
+    		//canardHandleRxFrame(&g_canard, &msg_temp, get_uptime() * 1000);
+    		canardHandleRxFrame(&g_canard, &msg_temp, 1000);
+    		//int i = 0;
+    		//i = msg_temp.msgID;
+    		//switch(i) {
+    		//	case 0x006: gMotorVars.Flag_enableUserParams = false; break;
+    		//	case 0x106: gMotorVars.Flag_enableUserParams = true; break;
+    		//	default:			           gMotorVars.Flag_enableSys = true; break;
+    		//}
     	}
 		FIFO_FLUSH(gECAN_rxFIFO_ID);
 #endif
@@ -811,7 +844,6 @@ interrupt void ecan1ISR(void){
 	HAL_pieAckInt(halHandle, PIE_GroupNumber_9);
 	return;
 }
-
 
 //@} //defgroup
 // end of file
